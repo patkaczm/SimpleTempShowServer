@@ -1,13 +1,25 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.shortcuts import render
 from .models import Temperature
 from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
+def all_temp(request):
+    return JsonResponse({"temperatures": [{"date": temperature.date, "value": temperature.value} for temperature in
+                                          Temperature.objects.all()]})
+
 
 @csrf_exempt
-def temp(request):
-    if request.method == 'POST':
-        Temperature(value=request.POST.get("temperature")).save()
-        return JsonResponse({"ACK": ""})
-    else:
-        return JsonResponse({"temperatures": [{"date": temperature.date, "value": temperature.value} for temperature in Temperature.objects.all()]})
+def set_temp(request, temperature=None):
+    print(temperature)
+    Temperature(value=temperature).save()
+    return JsonResponse({"ACK": ""})
+
+
+def show_temp(request):
+    ret = []
+    for temperature in Temperature.objects.all():
+        ret.append({'date': temperature.date.strftime('%x %X'),
+                    'value': temperature.value})
+    return render(request, "temp/show_temp.html", {'temperatures': ret})
