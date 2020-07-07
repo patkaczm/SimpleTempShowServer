@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from .models import Temperature
 from django.views.decorators.csrf import csrf_exempt
+import datetime
 
 @csrf_exempt
 def all_temp(request):
@@ -19,7 +20,7 @@ def set_temp(request, temperature=None):
 
 def show_temp(request):
     ret = []
-    for temperature in Temperature.objects.all():
+    for temperature in Temperature.objects.filter(date__gt=datetime.datetime.today() - datetime.timedelta(days=1)):
         ret.append({'date': temperature.date.strftime('%x %X'),
                     'value': temperature.value})
     return render(request, "temp/show_temp.html", {'temperatures': ret})
